@@ -1,0 +1,4 @@
+requests
+pandas
+pydantic
+pydantic-settings

@@ -1,0 +1,9 @@
+{
+    "access_token": "YOUR_ACCESS_TOKEN",
+    "expires_in": 3600,
+    "refresh_token": "YOUR_REFRESH_TOKEN",
+    "scope": "activity profile",
+    "token_type": "Bearer",
+    "user_id": "YOUR_USER_ID",
+    "expires_at": 1234567890
+}
