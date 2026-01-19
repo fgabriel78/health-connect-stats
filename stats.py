@@ -27,18 +27,28 @@ def calculate_stats(client: FitbitClient) -> Dict[str, Any]:
     logger.info(f"Fetching historical data from {start_date_str} to {end_date_str}...")
     time_series = client.get_step_time_series(start_date_str, end_date_str)
     
-    # Parse time series
+    # Parse time series map for date-based lookup
+    steps_by_date = {entry["dateTime"]: int(entry["value"]) for entry in time_series}
+    
+    # helper to generate date range
     daily_values: List[int] = []
-    for entry in time_series:
-        daily_values.append(int(entry["value"]))
+    current_date = date_30_days_ago
+    
+    # Iterate through the expected 30 days
+    while current_date <= yesterday:
+        d_str = current_date.strftime("%Y-%m-%d")
+        steps = steps_by_date.get(d_str, 0) # Default to 0 if no data for date
+        daily_values.append(steps)
+        current_date += timedelta(days=1)
         
     # Calculate averages
-    # Weekly: Last 7 entries
-    last_7_days = daily_values[-7:] if len(daily_values) >= 7 else daily_values
-    weekly_avg = sum(last_7_days) / len(last_7_days) if last_7_days else 0
+    # Weekly: Last 7 entries from the 30-day list
+    last_7_days = daily_values[-7:]
     
-    # Monthly: Last 30 entries (or however many we got)
-    monthly_avg = sum(daily_values) / len(daily_values) if daily_values else 0
+    # Explicitly divide by 7 and 30 (or actual count if we changed logic, but here we forced the size)
+    # This gives "Average steps per day over the last week/month" regardless of missing data holes.
+    weekly_avg = sum(last_7_days) / 7
+    monthly_avg = sum(daily_values) / 30
     
     return {
         "today_steps": today_steps,
